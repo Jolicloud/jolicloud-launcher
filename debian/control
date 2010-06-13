@@ -1,0 +1,13 @@
+Source: jolicloud-launcher
+Section: jolicloud/misc
+Priority: extra
+Maintainer: Jolicloud developers <developers@jolicloud.org>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.0
+Homepage: http://www.jolicloud.org
+
+Package: jolicloud-launcher
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, nickel-browser
+Description: Jolicloud Launcher
+ Jolicloud launcher
