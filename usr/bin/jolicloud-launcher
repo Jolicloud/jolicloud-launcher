@@ -2,6 +2,7 @@
 
 $SIG{ 'CHLD' } = 'IGNORE';
 $| = 1;
+$0 = "jolicloud-launcher";
 
 my $URL = "http://launcher.dev.jolicloud.org";
 
