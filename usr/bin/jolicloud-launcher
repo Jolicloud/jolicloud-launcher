@@ -17,8 +17,7 @@ if ( $children[ $#children ] == 0 ) {
     open( STDERR, ">>$LOGDIR/jolicloud-daemon.log" );
     for ( ;; ) {
         print "jolicloud-daemon: launching...\n";
-        system( "/usr/bin/jolicloud-daemon" );
-        print "Got: $?\n";
+        system( "/usr/bin/jolicloud-daemon", "-d" );
         if ( $? == -1 ) {
             print "jolicloud-daemon: failed to execute: $!\n";
         }
