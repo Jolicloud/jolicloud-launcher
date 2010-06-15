@@ -16,6 +16,10 @@ push( @children, fork );
 if ( $children[ $#children ] == 0 ) {
     open( STDERR, ">>$LOGDIR/jolicloud-daemon.log" );
     for ( ;; ) {
+        if ( `pgrep -fl jolicloud-daemon` ) {
+            sleep( 5 );
+            next;
+        }
         print "jolicloud-daemon: launching...\n";
         system( "/usr/bin/jolicloud-daemon", "-d" );
         if ( $? == -1 ) {
@@ -33,6 +37,10 @@ push( @children, fork );
 if ( $children[ $#children ] == 0 ) {
     open( STDERR, ">>$LOGDIR/nickel-browser.log" );
     for ( ;; ) {
+        if ( `pgrep -fl nickel-browser | grep '\\-\\-desktop'` ) {
+            sleep( 5 );
+            next;
+        }
         print "nickel-browser: launching...\n";
         system( "/usr/bin/nickel-browser", "--app=$URL", "--desktop",
                 "--no-default-browser-check", "--enable-logging=stderr",
@@ -45,7 +53,6 @@ if ( $children[ $#children ] == 0 ) {
                   $? >> 8;
         }
     }
-    sleep(5);
     exit;
 }
 
