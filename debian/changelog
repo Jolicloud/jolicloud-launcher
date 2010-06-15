@@ -1,3 +1,13 @@
+jolicloud-launcher (1.0.0~dev4) robby-dev; urgency=low
+
+  * Set this program's name in the process list to "jolicloud-launcher"
+  * Fix programs' STDERR output to their respective log files;
+    jolicloud-launcher's STDOUT to its own log file
+  * If something happens to the main program, kill all the looping
+    children
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 15 Jun 2010 18:15:43 +0200
+
 jolicloud-launcher (1.0.0~dev3) robby-dev; urgency=low
 
   * Added jolicloud-daemon into jolicloud-launcher
