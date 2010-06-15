@@ -1,3 +1,9 @@
+jolicloud-launcher (1.0.0~dev5) robby-dev; urgency=low
+
+  * Re-enabled logable output of jolicloud-daemon
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 15 Jun 2010 18:19:55 +0200
+
 jolicloud-launcher (1.0.0~dev4) robby-dev; urgency=low
 
   * Set this program's name in the process list to "jolicloud-launcher"
