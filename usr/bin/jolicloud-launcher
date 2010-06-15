@@ -1,19 +1,24 @@
 #!/usr/bin/perl
 
-$SIG{ 'CHLD' } = 'IGNORE';
 $| = 1;
 $0 = "jolicloud-launcher";
 
 my $URL = "http://launcher.dev.jolicloud.org";
+my $LOGDIR = "$ENV{'HOME'}/.cache";
 
-my $pid = 0;
-open( STDOUT, ">>/tmp/jolicloud-launcher.log" );
+( -d $LOGDIR ) || mkdir( $LOGDIR );
 
-if ( $pid = fork ) {
-    open( STDERR, ">>/tmp/jolicloud-daemon.log" );
+my ( $pid, @children );
+open( STDOUT, ">>$LOGDIR/jolicloud-launcher.log" );
+
+
+push( @children, fork );
+if ( $children[ $#children ] == 0 ) {
+    open( STDERR, ">>$LOGDIR/jolicloud-daemon.log" );
     for ( ;; ) {
         print "jolicloud-daemon: launching...\n";
-        system( "/usr/bin/jolicloud-daemon", "-d" );
+        system( "/usr/bin/jolicloud-daemon" );
+        print "Got: $?\n";
         if ( $? == -1 ) {
             print "jolicloud-daemon: failed to execute: $!\n";
         }
@@ -24,8 +29,10 @@ if ( $pid = fork ) {
     }
     exit;
 }
-if ( $pid = fork ) {
-    open( STDERR, ">>/tmp/jolicloud-daemon.log" );
+
+push( @children, fork );
+if ( $children[ $#children ] == 0 ) {
+    open( STDERR, ">>$LOGDIR/nickel-browser.log" );
     for ( ;; ) {
         print "nickel-browser: launching...\n";
         system( "/usr/bin/nickel-browser", "--app=$URL", "--desktop",
@@ -39,7 +46,25 @@ if ( $pid = fork ) {
                   $? >> 8;
         }
     }
+    sleep(5);
     exit;
 }
 
 
+# If something happens to the main program, kill all the looping children
+
+$SIG{ 'INT' } = \&reaper;
+$SIG{ 'TERM' } = \&reaper;
+$SIG{ 'KILL' } = \&reaper;
+$SIG{ 'HUP' } = 'IGNORE';
+
+foreach ( @children ) {
+    waitpid( $_, 0 );
+}
+
+
+sub reaper
+{
+    warn "Killing: @children";
+    kill( 15, @children );
+}
