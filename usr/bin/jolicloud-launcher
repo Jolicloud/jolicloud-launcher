@@ -1,5 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 URL=http://launcher.dev.jolicloud.org
 
-/usr/bin/nickel-browser --apps=$URL --desktop --enable-logging=stderr --logging=0 2>> /tmp/jolicloud-launcher.log
+( /usr/bin/jolicloud-daemon -d >> /tmp/jolicloud-daemon.log ) &
+
+( /usr/bin/nickel-browser --app=$URL --desktop --no-default-browser-check \
+    --enable-logging=stderr --log-level=0 2>> /tmp/nickel-browser.log ) &
+
