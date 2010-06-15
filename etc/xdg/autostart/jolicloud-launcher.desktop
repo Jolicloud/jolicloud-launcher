@@ -3,7 +3,7 @@ Encoding=UTF-8
 Name=Jolicloud Launcher
 Comment=A HTML5 desktop launcher
 Icon=gnome-fs-desktop
-Exec=nickel-browser --desktop --app=http://launcher.dev.jolicloud.org
+Exec=jolicloud-launcher
 Terminal=false
 Type=Application
 Categories=
