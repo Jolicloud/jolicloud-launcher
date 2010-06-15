@@ -7,34 +7,35 @@ $0 = "jolicloud-launcher";
 my $URL = "http://launcher.dev.jolicloud.org";
 
 my $pid = 0;
-open( STDERR, ">>/tmp/jolicloud-launcher.log" );
+open( STDOUT, ">>/tmp/jolicloud-launcher.log" );
+
 if ( $pid = fork ) {
-    open( STDOUT, ">>/tmp/jolicloud-daemon.log" );
+    open( STDERR, ">>/tmp/jolicloud-daemon.log" );
     for ( ;; ) {
-        print STDERR "jolicloud-daemon: launching...\n";
+        print "jolicloud-daemon: launching...\n";
         system( "/usr/bin/jolicloud-daemon", "-d" );
         if ( $? == -1 ) {
-            print STDERR "jolicloud-daemon: failed to execute: $!\n";
+            print "jolicloud-daemon: failed to execute: $!\n";
         }
         else {
-            print STDERR "jolicloud-daemon: child exited with value %d\n",
+            print "jolicloud-daemon: child exited with value %d\n",
                   $? >> 8;
         }
     }
     exit;
 }
 if ( $pid = fork ) {
-    open( STDOUT, ">>/tmp/nickel-browser.log" );
+    open( STDERR, ">>/tmp/jolicloud-daemon.log" );
     for ( ;; ) {
-        print STDERR "nickel-browser: launching...\n";
+        print "nickel-browser: launching...\n";
         system( "/usr/bin/nickel-browser", "--app=$URL", "--desktop",
                 "--no-default-browser-check", "--enable-logging=stderr",
                 "--log-level=0" );
         if ( $? == -1 ) {
-            print STDERR "nickel-browser: failed to execute: $!\n";
+            print "nickel-browser: failed to execute: $!\n";
         }
         else {
-            print STDERR "nickel-browser: child exited with value %d\n", 
+            print "nickel-browser: child exited with value %d\n", 
                   $? >> 8;
         }
     }
