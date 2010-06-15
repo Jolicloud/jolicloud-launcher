@@ -1,3 +1,10 @@
+jolicloud-launcher (1.0.0~dev2) robby-dev; urgency=low
+
+  * Created a jolicloud-launcher shell script; log to /tmp/jolicloud-
+    launcher.log
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 15 Jun 2010 12:29:21 +0200
+
 jolicloud-launcher (1.0.0~dev1) robby-dev; urgency=low
 
  * Initial development release
