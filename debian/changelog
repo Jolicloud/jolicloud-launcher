@@ -1,3 +1,12 @@
+jolicloud-launcher (1.0.0~dev3) robby-dev; urgency=low
+
+  * Added jolicloud-daemon into jolicloud-launcher
+  * Converted jolicloud-launcher to restart nickel or daemon if they die
+    unexpectedly.
+  * Setup jolicloud-launcher to depend on jolicloud-daemon
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 15 Jun 2010 15:57:23 +0200
+
 jolicloud-launcher (1.0.0~dev2) robby-dev; urgency=low
 
   * Created a jolicloud-launcher shell script; log to /tmp/jolicloud-
