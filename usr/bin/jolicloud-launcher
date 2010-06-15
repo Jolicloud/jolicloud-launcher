@@ -4,7 +4,7 @@ $| = 1;
 $0 = "jolicloud-launcher";
 
 my $URL = "http://launcher.dev.jolicloud.org";
-my $LOGDIR = "$ENV{'HOME'}/.cache";
+my $LOGDIR = "/var/tmp";
 
 ( -d $LOGDIR ) || mkdir( $LOGDIR );
 
