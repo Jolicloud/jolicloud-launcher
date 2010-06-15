@@ -1,3 +1,10 @@
+jolicloud-launcher (1.0.0~dev6) robby-dev; urgency=low
+
+  * If a fight gets started with multiple jolicloud-daemons, jolicloud-
+    launcher should back-off.
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 15 Jun 2010 19:06:32 +0200
+
 jolicloud-launcher (1.0.0~dev5) robby-dev; urgency=low
 
   * Re-enabled logable output of jolicloud-daemon
