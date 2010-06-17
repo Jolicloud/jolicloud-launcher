@@ -29,7 +29,7 @@ if ( $children[ $#children ] == 0 ) {
             print "jolicloud-daemon: failed to execute: $!\n";
         }
         else {
-            print "jolicloud-daemon: child exited with value %d\n",
+            printf "jolicloud-daemon: child exited with value %d\n",
                   $? >> 8;
         }
     }
