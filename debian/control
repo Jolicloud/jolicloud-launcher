@@ -9,5 +9,8 @@ Homepage: http://www.jolicloud.org
 Package: jolicloud-launcher
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, jolicloud-daemon, nickel-browser
+Replaces: jolicloud-webapp-jolicloud-launcher
+Provides: jolicloud-webapp-jolicloud-launcher
+Conflicts: jolicloud-webapp-jolicloud-launcher
 Description: Jolicloud Launcher
  Jolicloud launcher
