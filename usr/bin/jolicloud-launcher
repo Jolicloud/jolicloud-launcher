@@ -63,7 +63,7 @@ if ( $children[ $#children ] == 0 ) {
 
         system( "/usr/bin/nickel-browser", "--app=$url", "--desktop",
                 "--no-default-browser-check", "--enable-logging=stderr",
-                "--log-level=0" );
+                "--enable-ipv6", "--log-level=0" );
         if ( $? == -1 ) {
             print "nickel-browser: failed to execute: $!\n";
         }
