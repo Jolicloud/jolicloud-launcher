@@ -6,7 +6,8 @@ $| = 1;
 $0 = "jolicloud-launcher";
 
 my $ONLINE_URL = "http://launcher.dev.jolicloud.org";
-my $OFFLINE_URL = "http://localhost:8004";
+my $OFFLINE_URL =
+    "file:///usr/share/doc/jolicloud-daemon/examples/test-ws-client.html";
 my $LOGDIR = "/var/tmp";
 
 ( -d $LOGDIR ) || mkdir( $LOGDIR );
