@@ -1,3 +1,10 @@
+jolicloud-launcher (1.0.0~dev8) robby-dev; urgency=low
+
+  * Added an online/offline mode checker to send the user to a local
+    address
+
+ -- Adam McDaniel <adam@jolicloud.org>  Thu, 17 Jun 2010 19:50:26 +0200
+
 jolicloud-launcher (1.0.0~dev7) robby-dev; urgency=low
 
   * Configure package to replace, provide, and conflict with jolicloud-
