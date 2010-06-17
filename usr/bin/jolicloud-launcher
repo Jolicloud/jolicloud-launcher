@@ -1,9 +1,12 @@
 #!/usr/bin/perl
 
+use LWP;
+
 $| = 1;
 $0 = "jolicloud-launcher";
 
-my $URL = "http://launcher.dev.jolicloud.org";
+my $ONLINE_URL = "http://launcher.dev.jolicloud.org";
+my $OFFLINE_URL = "http://localhost:8004";
 my $LOGDIR = "$ENV{'HOME'}/.cache";
 
 ( -d $LOGDIR ) || mkdir( $LOGDIR );
@@ -35,21 +38,37 @@ if ( $children[ $#children ] == 0 ) {
 
 push( @children, fork );
 if ( $children[ $#children ] == 0 ) {
+    my $ua = LWP::UserAgent->new();
     open( STDERR, ">>$LOGDIR/nickel-browser.log" );
+
     for ( ;; ) {
         if ( `pgrep -fl nickel-browser | grep '\\-\\-desktop'` ) {
             sleep( 5 );
             next;
         }
+
         print "nickel-browser: launching...\n";
-        system( "/usr/bin/nickel-browser", "--app=$URL", "--desktop",
+
+        # Do a generic ping of the ping URL. If it responds with error
+        # status 400: NOT_LOGGED_IN we know we have internet access to the
+        # jolicloud server.
+        my $req = HTTP::Request->new( GET => "$ONLINE_URL/api/ping" );
+        my $res = $ua->request( $req );
+        my $url = $ONLINE_URL;
+        if ( $res->code ne 400 &&
+             $res->content eq '{"error":{"code":"NOT_LOGGED_IN"}}' ) {
+            # No internet access, display the internal offline URL.
+            $url = $OFFLINE_URL;
+        }
+
+        system( "/usr/bin/nickel-browser", "--app=$url", "--desktop",
                 "--no-default-browser-check", "--enable-logging=stderr",
                 "--log-level=0" );
         if ( $? == -1 ) {
             print "nickel-browser: failed to execute: $!\n";
         }
         else {
-            print "nickel-browser: child exited with value %d\n", 
+            printf "nickel-browser: child exited with value %d\n", 
                   $? >> 8;
         }
     }
