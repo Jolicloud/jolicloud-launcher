@@ -55,7 +55,7 @@ if ( $children[ $#children ] == 0 ) {
         my $req = HTTP::Request->new( GET => "$ONLINE_URL/api/ping" );
         my $res = $ua->request( $req );
         my $url = $ONLINE_URL;
-        if ( $res->code ne 400 &&
+        unless ( $res->code eq 400 &&
              $res->content eq '{"error":{"code":"NOT_LOGGED_IN"}}' ) {
             # No internet access, display the internal offline URL.
             $url = $OFFLINE_URL;
