@@ -19,7 +19,7 @@ push( @children, fork );
 if ( $children[ $#children ] == 0 ) {
     open( STDERR, ">>$LOGDIR/jolicloud-daemon.log" );
     for ( ;; ) {
-        if ( `pgrep -fl jolicloud-daemon` ) {
+        if ( `pgrep -fl ^jolicloud-daemon` ) {
             sleep( 5 );
             next;
         }
