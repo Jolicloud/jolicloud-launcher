@@ -1,3 +1,18 @@
+jolicloud-launcher (1.0.0) robby; urgency=low
+
+  * Hard-code to a local file://, until the http server can be fixed
+  * Adjusted the local URL directory
+  * Force a reboot if this is the "initial-deployment" version of this
+    package.
+  * Add "--no-first-run" to remove default Chromium welcome screen, just
+    incase this is the first time the nickel-browser is ran.
+  * Use jolicloud-notifier's reboot dialog with apt-queue since
+    jolicloud-daemon is potentially unreliable after an upgrade of the
+    launcher.
+  * Updated the launcher to go to the production V1.0 URL
+
+ -- Adam McDaniel <adam@jolicloud.org>  Mon, 12 Jul 2010 14:56:06 -0600
+
 jolicloud-launcher (1.0.0~dev9) robby-dev; urgency=low
 
   * Fixed the jolicloud-daemon pgrep command
