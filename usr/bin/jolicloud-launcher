@@ -5,7 +5,7 @@ use LWP;
 $| = 1;
 $0 = "jolicloud-launcher";
 
-my $ONLINE_URL = "http://launcher.dev.jolicloud.org";
+my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
 my $LOGDIR = "/var/tmp";
 
