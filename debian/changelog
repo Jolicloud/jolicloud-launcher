@@ -1,3 +1,9 @@
+jolicloud-launcher (1.0.1) robby; urgency=low
+
+  * Fix logging; add perl dependencies
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Tue, 13 Jul 2010 16:09:19 +0200
+
 jolicloud-launcher (1.0.0) robby; urgency=low
 
   * Hard-code to a local file://, until the http server can be fixed
