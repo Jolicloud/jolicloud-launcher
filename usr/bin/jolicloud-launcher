@@ -1,36 +1,34 @@
 #!/usr/bin/perl
 
 use LWP;
+use Logger::Syslog;
 
 $| = 1;
-$0 = "jolicloud-launcher";
+$0 = "jolicloud-launcher [main]";
 
 my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
-my $LOGDIR = "/var/tmp";
 
-( -d $LOGDIR ) || mkdir( $LOGDIR );
-
-my ( $pid, @children );
-open( STDOUT, ">>$LOGDIR/jolicloud-launcher.log" );
-
+my @children;
 
 push( @children, fork );
 if ( $children[ $#children ] == 0 ) {
-    open( STDERR, ">>$LOGDIR/jolicloud-daemon.log" );
+    close( STDOUT );
+    close( STDERR );
+    $0 = "jolicloud-launcher [jolicloud-daemon]";
+    logger_prefix("jolicloud-daemon");
     for ( ;; ) {
         if ( `pgrep -fl ^jolicloud-daemon` ) {
             sleep( 5 );
             next;
         }
-        print "jolicloud-daemon: launching...\n";
-        system( "/usr/bin/jolicloud-daemon", "-d" );
+        notice( "launching" );
+        system( "/usr/bin/jolicloud-daemon" );
         if ( $? == -1 ) {
-            print "jolicloud-daemon: failed to execute: $!\n";
+            error( "failed to execute: $!" );
         }
         else {
-            printf "jolicloud-daemon: child exited with value %d\n",
-                  $? >> 8;
+            error( "child exited with value " . ( $? >> 8 ) );
         }
     }
     exit;
@@ -39,15 +37,17 @@ if ( $children[ $#children ] == 0 ) {
 push( @children, fork );
 if ( $children[ $#children ] == 0 ) {
     my $ua = LWP::UserAgent->new();
-    open( STDERR, ">>$LOGDIR/nickel-browser.log" );
-
+    close( STDOUT );
+    close( STDERR );
+    $0 = "jolicloud-launcher [nickel-browser]";
+    logger_prefix("nickel-browser");
     for ( ;; ) {
         if ( `pgrep -fl nickel-browser | grep '\\-\\-desktop'` ) {
             sleep( 5 );
             next;
         }
 
-        print "nickel-browser: launching...\n";
+        notice( "launching" );
 
         # Do a generic ping of the ping URL. If it responds with error
         # status 400: NOT_LOGGED_IN we know we have internet access to the
@@ -62,14 +62,13 @@ if ( $children[ $#children ] == 0 ) {
         }
 
         system( "/usr/bin/nickel-browser", "--app=$url", "--desktop",
-                "--no-default-browser-check", "--enable-logging=stderr",
-                "--no-first-run", "--enable-ipv6", "--log-level=0" );
+                "--no-default-browser-check",
+                "--no-first-run", "--enable-ipv6" );
         if ( $? == -1 ) {
-            print "nickel-browser: failed to execute: $!\n";
+            error( "failed to execute: $!" );
         }
         else {
-            printf "nickel-browser: child exited with value %d\n", 
-                  $? >> 8;
+            error( "child exited with value " . ( $? >> 8 ) );
         }
     }
     exit;
@@ -90,6 +89,6 @@ foreach ( @children ) {
 
 sub reaper
 {
-    warn "Killing: @children";
-    kill( 15, @children );
+    notice( "killing: " . join( ', ', @children ) );
+    kill( 'TERM', @children );
 }
