@@ -1,3 +1,9 @@
+jolicloud-launcher (1.0.2) robby; urgency=low
+
+  * Use the new jolicloud-notifier notify-reboot-required method
+
+ -- Adam McDaniel <adam@jolicloud.org>  Wed, 28 Jul 2010 13:06:00 -0600
+
 jolicloud-launcher (1.0.1) robby; urgency=low
 
   * Fix logging; add perl dependencies
