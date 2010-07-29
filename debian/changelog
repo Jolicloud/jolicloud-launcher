@@ -1,3 +1,10 @@
+jolicloud-launcher (1.0.3) robby-dev; urgency=low
+
+  * Revert "Use the new jolicloud-notifier notify-reboot-required
+    method"
+
+ -- Adam McDaniel <adam@jolicloud.org>  Thu, 29 Jul 2010 10:21:27 -0600
+
 jolicloud-launcher (1.0.2) robby; urgency=low
 
   * Use the new jolicloud-notifier notify-reboot-required method
