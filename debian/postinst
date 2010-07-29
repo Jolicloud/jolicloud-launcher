@@ -12,7 +12,12 @@ case "$1" in
     configure)
         if dpkg --compare-versions "$2" le "1.0.0"; then
             echo "Forcing reboot to switch to new launcher."
-            /usr/lib/jolicloud-notifier/notify-reboot-required
+            touch /var/run/reboot-required
+
+            # FIXME: Enhance jolicloud-notifier's reboot-dialog so it
+            # automatically uses apt-queue and watches for
+            # /var/run/reboot-required itself.
+            apt-queue /usr/lib/jolicloud-notifier/reboot-dialog
         fi
 esac
 
