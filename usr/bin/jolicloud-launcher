@@ -41,6 +41,22 @@ if ( $children[ $#children ] == 0 ) {
     close( STDERR );
     $0 = "jolicloud-launcher [nickel-browser]";
     logger_prefix("nickel-browser");
+
+    $max_flag = "--start-maximized";
+    open XDPYINFO, "xdpyinfo |";
+    while (<XDPYINFO>) {
+        if (/^ *dimensions:.+\((\d+)x(\d+) millimeters/) {
+            $width = $1*0.03937 ;
+            $height = $2*0.03937 ;
+            $diag2 = $width*$width + $height*$height;
+            notice ( "w: $width, h:$height, d²:$diag2\n" );
+            if ($diag2 > 169 ) { # 13" diag
+                $max_flag = "--no-start-maximized";
+            }
+        }
+    }
+    close XDPYINFO;
+
     for ( ;; ) {
         if ( `pgrep -fl nickel-browser | grep '\\-\\-desktop'` ) {
             sleep( 5 );
@@ -63,6 +79,7 @@ if ( $children[ $#children ] == 0 ) {
 
         system( "/usr/bin/nickel-browser", "--app=$url", "--desktop",
                 "--no-default-browser-check",
+                $max_flag,
                 "--no-first-run", "--enable-ipv6" );
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
