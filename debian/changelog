@@ -1,3 +1,11 @@
+jolicloud-launcher (1.0.4) robby; urgency=low
+
+  * make all chromium windows maximized if screen size < 13"
+  * kill any remaining jolicloud-launcher from previous sessions
+  * kill any remaining jolicloud-daemon or nickel-browser
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Fri, 06 Aug 2010 16:19:46 +0200
+
 jolicloud-launcher (1.0.3) robby-dev; urgency=low
 
   * Revert "Use the new jolicloud-notifier notify-reboot-required
