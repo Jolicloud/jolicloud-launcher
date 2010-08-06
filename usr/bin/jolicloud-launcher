@@ -11,7 +11,7 @@ opendir(PROC, "/proc");
 @cmds = grep { /^\d+$/ && -f "/proc/$_/cmdline" } readdir(PROC);
 closedir PROC;
 
-foreach (@cmds) {
+foreach (@cmds) { # jolicloud-launcher [main]
     open(CMD,"/proc/$_/cmdline");
     $cmd = <CMD>;
     close CMD;
@@ -20,6 +20,23 @@ foreach (@cmds) {
         kill 15, $_;
     }
 }
+
+sleep 1;
+
+foreach (@cmds) { # above ought to have killed any remaining jolicloud-daemon or nickel-browser but you never know
+    open(CMD,"/proc/$_/cmdline");
+    $cmd = <CMD>;
+    close CMD;
+    chomp $cmd;
+    if ($cmd eq "jolicloud-daemon") {
+        kill 15, $_;
+    }
+    elsif ($cmd =~ m|^/usr/lib/nickel-browser.*--desktop|) {
+        kill 15, $_;
+    }
+}
+
+sleep 1;
 
 my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
