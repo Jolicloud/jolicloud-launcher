@@ -6,6 +6,21 @@ use Logger::Syslog;
 $| = 1;
 $0 = "jolicloud-launcher [main]";
 
+# kill any remaining jolicloud-launcher from a previous session
+opendir(PROC, "/proc");
+@cmds = grep { /^\d+$/ && -f "/proc/$_/cmdline" } readdir(PROC);
+closedir PROC;
+
+foreach (@cmds) {
+    open(CMD,"/proc/$_/cmdline");
+    $cmd = <CMD>;
+    close CMD;
+    chomp $cmd;
+    if ($cmd eq $0 && $$ ne $_) {
+        kill 15, $_;
+    }
+}
+
 my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
 
