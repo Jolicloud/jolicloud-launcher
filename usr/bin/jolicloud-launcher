@@ -4,14 +4,14 @@ use LWP;
 use Logger::Syslog;
 
 $| = 1;
-$0 = "jolicloud-launcher [main]";
+$0 = "jolicloud-launcher";
 
 # kill any remaining jolicloud-launcher from a previous session
 opendir(PROC, "/proc");
 @cmds = grep { /^\d+$/ && -f "/proc/$_/cmdline" } readdir(PROC);
 closedir PROC;
 
-foreach (@cmds) { # jolicloud-launcher [main]
+foreach (@cmds) { # jolicloud-launcher
     open(CMD,"/proc/$_/cmdline");
     $cmd = <CMD>;
     close CMD;
