@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.1) robby-lucid; urgency=low
+
+  * Start jolicloud-launcher earlier, at Gnome initialization
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 07 Sep 2010 11:00:44 -0600
+
 jolicloud-launcher (1.1.0) robby-lucid; urgency=low
 
   * Do not call main jolicoud-launcher process "jolicloud-launcher [main]"
