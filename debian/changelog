@@ -1,3 +1,15 @@
+jolicloud-launcher (1.0.5) robby; urgency=low
+
+  [ Adam McDaniel ]
+  * Do not call main jolicoud-launcher process "jolicloud-launcher
+    [main]"
+
+  [ Benjamin Ryzman ]
+  * Only sleep if really necessary; improve children lifecycle
+    management
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Fri, 10 Sep 2010 19:53:43 +0200
+
 jolicloud-launcher (1.0.4) robby; urgency=low
 
   * make all chromium windows maximized if screen size < 13"
