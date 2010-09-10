@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.2) robby-lucid; urgency=low
+
+  * Better handling of children lifecycle, only sleep when necessary
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Fri, 10 Sep 2010 22:12:44 +0200
+
 jolicloud-launcher (1.1.1) robby-lucid; urgency=low
 
   * Start jolicloud-launcher earlier, at Gnome initialization
