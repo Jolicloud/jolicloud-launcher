@@ -2,76 +2,103 @@
 
 use LWP;
 use Logger::Syslog;
+use POSIX ":sys_wait_h";
 
 $| = 1;
 $0 = "jolicloud-launcher";
+my $pid = $$;
+open PARENT, sprintf("/proc/%d/cmdline",getppid);
+my $parent = <PARENT>;
+close PARENT;
+$parent =~ s/\0.*//;
+info( sprintf ( "started by %d (%s)",getppid,$parent ) );
+
+setpgrp;
 
 # kill any remaining jolicloud-launcher from a previous session
 opendir(PROC, "/proc");
 @cmds = grep { /^\d+$/ && -f "/proc/$_/cmdline" } readdir(PROC);
 closedir PROC;
 
+my $killed = 0;
 foreach (@cmds) { # jolicloud-launcher
     open(CMD,"/proc/$_/cmdline");
     $cmd = <CMD>;
     close CMD;
-    chomp $cmd;
+    $cmd =~ s/\0.*//;
     if ($cmd eq $0 && $$ ne $_) {
-        kill 15, $_;
+        info( "killing $_" );
+        kill 'TERM', $_;
+        $killed = 1;
     }
 }
 
-sleep 1;
+sleep 1 if $killed;
 
+$killed = 0;
 foreach (@cmds) { # above ought to have killed any remaining jolicloud-daemon or nickel-browser but you never know
     open(CMD,"/proc/$_/cmdline");
     $cmd = <CMD>;
     close CMD;
-    chomp $cmd;
-    if ($cmd eq "jolicloud-daemon") {
-        kill 15, $_;
+    $cmd =~ s/\0.*//;
+    if ($cmd =~ /jolicloud-daemon/) {
+        info( "killing $_" );
+        kill 'TERM', $_;
+        $killed = 1;
     }
     elsif ($cmd =~ m|^/usr/lib/nickel-browser.*--desktop|) {
-        kill 15, $_;
+        info( "killing $_" );
+        kill 'TERM', $_;
+        $killed = 1;
     }
 }
 
-sleep 1;
+sleep 1 if $killed;
 
 my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
 
-my @children;
+my $child;
 
-push( @children, fork );
-if ( $children[ $#children ] == 0 ) {
+$child = fork;
+if ( !defined($child) ) {
+    error( "could not fork jolicloud-daemon: $!");
+}
+elsif ( $child == 0 ) {
     close( STDOUT );
     close( STDERR );
-    $0 = "jolicloud-launcher [jolicloud-daemon]";
+    $0 .= " [jolicloud-daemon]";
     logger_prefix("jolicloud-daemon");
     for ( ;; ) {
         if ( `pgrep -fl ^jolicloud-daemon` ) {
             sleep( 5 );
             next;
         }
-        notice( "launching" );
+        info( "launching" );
         system( "/usr/bin/jolicloud-daemon" );
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
         }
+        elsif ( $? & 127 ) {
+            error( sprintf( "jolicloud-daemon died with signal %d, %s coredump",
+                ( $? & 127 ), ( $? & 128) ? 'with' : 'without' ) );
+        }
         else {
-            error( "child exited with value " . ( $? >> 8 ) );
+            error( "jolicloud-daemon exited with value " . ( $? >> 8 ) );
         }
     }
     exit;
 }
 
-push( @children, fork );
-if ( $children[ $#children ] == 0 ) {
+$child = fork;
+if ( !defined($child) ) {
+    error( "could not fork nickel-browser: $!");
+}
+elsif ( $child == 0 ) {
     my $ua = LWP::UserAgent->new();
     close( STDOUT );
     close( STDERR );
-    $0 = "jolicloud-launcher [nickel-browser]";
+    $0 .= " [nickel-browser]";
     logger_prefix("nickel-browser");
 
     $max_flag = "--start-maximized";
@@ -81,7 +108,6 @@ if ( $children[ $#children ] == 0 ) {
             $width = $1*0.03937 ;
             $height = $2*0.03937 ;
             $diag2 = $width*$width + $height*$height;
-            notice ( "w: $width, h:$height, d²:$diag2\n" );
             if ($diag2 > 169 ) { # 13" diag
                 $max_flag = "--no-start-maximized";
             }
@@ -95,7 +121,7 @@ if ( $children[ $#children ] == 0 ) {
             next;
         }
 
-        notice( "launching" );
+        info( "launching $max_flag" );
 
         # Do a generic ping of the ping URL. If it responds with error
         # status 400: NOT_LOGGED_IN we know we have internet access to the
@@ -116,28 +142,38 @@ if ( $children[ $#children ] == 0 ) {
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
         }
+        elsif ( $? & 127 ) {
+            error( sprintf( "nickel-browser died with signal %d, %s coredump",
+                ( $? & 127 ), ( $? & 128) ? 'with' : 'without' ) );
+            if ( ( $? & 127 ) == 6 ) { # ABRT received, usually means end of session
+                kill 'TERM', $pid;
+            }
+        }
         else {
-            error( "child exited with value " . ( $? >> 8 ) );
+            error( "nickel-browser exited with value " . ( $? >> 8 ) );
         }
     }
     exit;
 }
-
-
-# If something happens to the main program, kill all the looping children
 
 $SIG{ 'INT' } = \&reaper;
 $SIG{ 'TERM' } = \&reaper;
 $SIG{ 'KILL' } = \&reaper;
 $SIG{ 'HUP' } = 'IGNORE';
 
-foreach ( @children ) {
-    waitpid( $_, 0 );
-}
-
+# If something happens to the main program, kill all the program group
 
 sub reaper
 {
-    notice( "killing: " . join( ', ', @children ) );
-    kill( 'TERM', @children );
+    my $sig = shift;
+    local $SIG{'TERM'} = 'IGNORE';
+    info( "caught a SIG$sig--shutting down" );
+    kill( 'TERM', -getpgrp );
+    sleep 1;
+    kill( 'TERM', -getpgrp );
+    exit;
 }
+
+# Wait for all children before exiting
+
+do { $child = waitpid(-1, 0); } while $child;
