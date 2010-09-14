@@ -11,14 +11,14 @@ my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher','') or 
 my $sm_private_client = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object($sm_client_id,'org.gnome.SessionManager.ClientPrivate') or error("Could not get DBus SessionManager.ClientPrivate object with id $sm_client_id");
 $sm_private_client->connect_to_signal('Stop', sub {
     notice("shut down by SessionManager");
-    }) or error("Could not connect to Stop signal");
+    });
 $sm_private_client->connect_to_signal('QueryEndSession', sub {
     notice("SessionManager signaled QueryEndSession");
-    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); }) or error("Could not connect to QueryEndSession signal");
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); });
 $sm_private_client->connect_to_signal('EndSession', sub {
     notice("SessionManager signaled EndSession");
     &reaper;
-    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); }) or error("Could not connect to EndSession signal");
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); });
 
 my $reactor = Net::DBus::Reactor->main();
 
@@ -185,7 +185,8 @@ sub reaper
 {
     my $sig = shift;
     local $SIG{'TERM'} = 'IGNORE';
-    info( "caught a SIG$sig--shutting down" );
+    info( "caught a SIG$sig--shutting down" ) if $sig;
+    info( "shutting down" ) unless $sig;
     kill( 'TERM', -getpgrp );
     sleep 1;
     kill( 'TERM', -getpgrp );
