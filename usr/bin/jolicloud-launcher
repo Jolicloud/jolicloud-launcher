@@ -2,7 +2,25 @@
 
 use LWP;
 use Logger::Syslog;
+use Net::DBus ":typing";
+use Net::DBus::Reactor;
 use POSIX ":sys_wait_h";
+
+my $session_manager = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object('/org/gnome/SessionManager') or error("Could not get DBus SessionManager object");
+my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher','') or error("Could not register with SessionManager");
+my $sm_private_client = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object($sm_client_id,'org.gnome.SessionManager.ClientPrivate') or error("Could not get DBus SessionManager.ClientPrivate object with id $sm_client_id");
+$sm_private_client->connect_to_signal('Stop', sub {
+    notice("shut down by SessionManager");
+    }) or error("Could not connect to Stop signal");
+$sm_private_client->connect_to_signal('QueryEndSession', sub {
+    notice("SessionManager signaled QueryEndSession");
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); }) or error("Could not connect to QueryEndSession signal");
+$sm_private_client->connect_to_signal('EndSession', sub {
+    notice("SessionManager signaled EndSession");
+    &reaper;
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); }) or error("Could not connect to EndSession signal");
+
+my $reactor = Net::DBus::Reactor->main();
 
 $| = 1;
 $0 = "jolicloud-launcher";
@@ -171,9 +189,17 @@ sub reaper
     kill( 'TERM', -getpgrp );
     sleep 1;
     kill( 'TERM', -getpgrp );
+    $session_manager->UnregisterClient($sm_client_id);
     exit;
 }
 
 # Wait for all children before exiting
+my $hook = $reactor->add_hook(Net::DBus::Callback->new(
+    method => sub {
+        my $kid;
+        do {
+            $kid = waitpid( -1, WNOHANG );
+        } while $kid > 0;
+    }));
 
-do { $child = waitpid(-1, 0); } while $child;
+$reactor->run();
