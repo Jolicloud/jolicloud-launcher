@@ -4,7 +4,7 @@ use LWP;
 use Logger::Syslog;
 use Net::DBus ":typing";
 use Net::DBus::Reactor;
-use POSIX ":sys_wait_h";
+use POSIX;
 
 my $session_manager = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object('/org/gnome/SessionManager') or error("Could not get DBus SessionManager object");
 my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher','') or error("Could not register with SessionManager");
@@ -85,6 +85,9 @@ if ( !defined($child) ) {
 elsif ( $child == 0 ) {
     close( STDOUT );
     close( STDERR );
+    open $devnull, '+>', '/dev/null';
+    dup2( STDOUT, $devnull );
+    dup2( STDERR, $devnull );
     $0 .= " [jolicloud-daemon]";
     logger_prefix("jolicloud-daemon");
     for ( ;; ) {

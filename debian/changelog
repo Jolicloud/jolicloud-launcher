@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.4.1) robby; urgency=low
+
+  * Reopen STDOUT and STDERR for jolicloud-daemon
+
+ -- Andrew Stormont <andy@jolicloud.org>  Sat, 18 Sep 2010 12:35:29 +0100
+
 jolicloud-launcher (1.1.4) robby-lucid; urgency=low
 
   * remove invalid errors on connect_to_signal, better info on shutdown
