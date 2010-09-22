@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.6) robby-lucid; urgency=low
+
+  * Keep tab on direct children to kill them first when shutting down
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Wed, 22 Sep 2010 12:24:04 +0200
+
 jolicloud-launcher (1.1.5) robby-lucid; urgency=low
 
   * Send the QUIT signal first, so that nickel-browser does not Snap
