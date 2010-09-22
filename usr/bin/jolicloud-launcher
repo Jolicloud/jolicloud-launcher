@@ -177,6 +177,7 @@ elsif ( $child == 0 ) {
     exit;
 }
 
+$SIG{ 'QUIT' } = \&reaper;
 $SIG{ 'INT' } = \&reaper;
 $SIG{ 'TERM' } = \&reaper;
 $SIG{ 'KILL' } = \&reaper;
@@ -187,11 +188,12 @@ $SIG{ 'HUP' } = 'IGNORE';
 sub reaper
 {
     my $sig = shift;
-    local $SIG{'TERM'} = 'IGNORE';
     info( "caught a SIG$sig--shutting down" ) if $sig;
     info( "shutting down" ) unless $sig;
-    kill( 'TERM', -getpgrp );
+    local $SIG{'QUIT'} = 'IGNORE';
+    kill( 'QUIT', -getpgrp );
     sleep 1;
+    local $SIG{'TERM'} = 'IGNORE';
     kill( 'TERM', -getpgrp );
     $session_manager->UnregisterClient($sm_client_id);
     exit;
