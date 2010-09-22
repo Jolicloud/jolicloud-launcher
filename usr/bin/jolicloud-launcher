@@ -77,6 +77,7 @@ my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
 
 my $child;
+my @children;
 
 $child = fork;
 if ( !defined($child) ) {
@@ -109,6 +110,9 @@ elsif ( $child == 0 ) {
         }
     }
     exit;
+}
+else {
+    push @children,$child;
 }
 
 $child = fork;
@@ -176,6 +180,9 @@ elsif ( $child == 0 ) {
     }
     exit;
 }
+else {
+    push @children,$child;
+}
 
 $SIG{ 'QUIT' } = \&reaper;
 $SIG{ 'INT' } = \&reaper;
@@ -190,6 +197,12 @@ sub reaper
     my $sig = shift;
     info( "caught a SIG$sig--shutting down" ) if $sig;
     info( "shutting down" ) unless $sig;
+    # kill our direct children first, so that they don't relaunch the others
+    foreach(@children) {
+        info( "killing $_" );
+        kill( 'TERM', $_);
+    }
+    sleep 1;
     local $SIG{'QUIT'} = 'IGNORE';
     kill( 'QUIT', -getpgrp );
     sleep 1;
