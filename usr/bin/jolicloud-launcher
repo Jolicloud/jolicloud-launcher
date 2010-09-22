@@ -18,7 +18,9 @@ $sm_private_client->connect_to_signal('QueryEndSession', sub {
 $sm_private_client->connect_to_signal('EndSession', sub {
     notice("SessionManager signaled EndSession");
     &reaper;
-    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); });
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),'');
+    exit;
+    });
 
 my $reactor = Net::DBus::Reactor->main();
 
@@ -209,7 +211,7 @@ sub reaper
     local $SIG{'TERM'} = 'IGNORE';
     kill( 'TERM', -getpgrp );
     $session_manager->UnregisterClient($sm_client_id);
-    exit;
+    exit if $sig;
 }
 
 # Wait for all children before exiting
