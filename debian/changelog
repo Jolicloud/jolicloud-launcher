@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.7) robby-lucid; urgency=low
+
+  * send EndSessionResponse to gnome-session *before* exiting
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Wed, 22 Sep 2010 17:28:56 +0200
+
 jolicloud-launcher (1.1.6) robby-lucid; urgency=low
 
   * Keep tab on direct children to kill them first when shutting down
