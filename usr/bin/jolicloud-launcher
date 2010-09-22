@@ -100,12 +100,12 @@ elsif ( $child == 0 ) {
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
         }
-        elsif ( $? & 127 ) {
+        elsif ( WIFSIGNALED $? ) {
             error( sprintf( "jolicloud-daemon died with signal %d, %s coredump",
-                ( $? & 127 ), ( $? & 128) ? 'with' : 'without' ) );
+                ( WTERMSIG( $? ) ), ( $? & 128 ) ? 'with' : 'without' ) );
         }
         else {
-            error( "jolicloud-daemon exited with value " . ( $? >> 8 ) );
+            error( "jolicloud-daemon exited with value " . WEXITSTATUS( $? ) );
         }
     }
     exit;
@@ -163,15 +163,15 @@ elsif ( $child == 0 ) {
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
         }
-        elsif ( $? & 127 ) {
+        elsif ( WIFSIGNALED $? ) {
             error( sprintf( "nickel-browser died with signal %d, %s coredump",
-                ( $? & 127 ), ( $? & 128) ? 'with' : 'without' ) );
-            if ( ( $? & 127 ) == 6 ) { # ABRT received, usually means end of session
-                kill 'TERM', $pid;
+                ( WTERMSIG( $? ) ), ( $? & 128 ) ? 'with' : 'without' ) );
+            if ( WTERMSIG( $? ) == 6 ) { # ABRT received, usually means end of session
+                kill 'QUIT', $pid;
             }
         }
         else {
-            error( "nickel-browser exited with value " . ( $? >> 8 ) );
+            error( "nickel-browser exited with value " . WEXITSTATUS( $? ) );
         }
     }
     exit;
