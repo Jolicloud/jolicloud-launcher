@@ -9,7 +9,7 @@ Homepage: http://www.jolicloud.org
 Package: jolicloud-launcher
 Architecture: all
 Pre-depends: apt-queue, jolicloud-notifier (>>1.0.0~)
-Depends: ${shlibs:Depends}, ${misc:Depends}, jolicloud-daemon, nickel-browser, liblogger-syslog-perl, libwww-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, jolicloud-daemon, nickel-browser, liblogger-syslog-perl, libwww-perl, jolicloud-pkg-daemon
 Replaces: jolicloud-webapp-jolicloud-launcher
 Provides: jolicloud-webapp-jolicloud-launcher, netbook-launcher
 Conflicts: jolicloud-webapp-jolicloud-launcher
