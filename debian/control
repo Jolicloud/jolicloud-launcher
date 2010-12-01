@@ -2,16 +2,16 @@ Source: jolicloud-launcher
 Section: jolicloud/misc
 Priority: extra
 Maintainer: Jolicloud developers <developers@jolicloud.org>
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), git-core
 Standards-Version: 3.8.0
 Homepage: http://www.jolicloud.org
 
 Package: jolicloud-launcher
 Architecture: all
 Pre-depends: apt-queue, jolicloud-notifier (>>1.0.0~)
-Depends: ${shlibs:Depends}, ${misc:Depends}, jolicloud-daemon, nickel-browser, liblogger-syslog-perl, libwww-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, jolicloud-daemon, nickel-browser, liblogger-syslog-perl, libwww-perl, jolicloud-pkg-daemon
 Replaces: jolicloud-webapp-jolicloud-launcher
-Provides: jolicloud-webapp-jolicloud-launcher
+Provides: jolicloud-webapp-jolicloud-launcher, netbook-launcher
 Conflicts: jolicloud-webapp-jolicloud-launcher
 Description: Jolicloud Launcher
  Jolicloud launcher

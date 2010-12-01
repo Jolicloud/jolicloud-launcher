@@ -1,4 +1,23 @@
-jolicloud-launcher (1.0.5.1) robby; urgency=low
+jolicloud-launcher (1.1.7) robby-lucid; urgency=low
+
+  * send EndSessionResponse to gnome-session *before* exiting
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Wed, 22 Sep 2010 17:28:56 +0200
+
+jolicloud-launcher (1.1.6) robby-lucid; urgency=low
+
+  * Keep tab on direct children to kill them first when shutting down
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Wed, 22 Sep 2010 12:24:04 +0200
+
+jolicloud-launcher (1.1.5) robby-lucid; urgency=low
+
+  * Send the QUIT signal first, so that nickel-browser does not Snap
+  * Use POSIX macros for abort signal/exit status handling
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Wed, 22 Sep 2010 11:27:12 +0200
+
+jolicloud-launcher (1.1.4.1) robby; urgency=low
 
   * Reopen STDOUT and STDERR for jolicloud-daemon
 
@@ -15,6 +34,40 @@ jolicloud-launcher (1.0.5) robby; urgency=low
     management
 
  -- Benjamin Ryzman <benjamin@jolicloud.org>  Fri, 10 Sep 2010 19:53:43 +0200
+
+jolicloud-launcher (1.1.4) robby-lucid; urgency=low
+
+  * remove invalid errors on connect_to_signal, better info on shutdown
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Tue, 14 Sep 2010 13:57:47 +0200
+
+jolicloud-launcher (1.1.3) robby-lucid; urgency=low
+
+  * Amend build-depends with git-core
+  * (un)Register with and respond to gnome-session through DBus
+    interface
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Tue, 14 Sep 2010 12:37:38 +0200
+
+jolicloud-launcher (1.1.2) robby-lucid; urgency=low
+
+  * Better handling of children lifecycle, only sleep when necessary
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Fri, 10 Sep 2010 22:12:44 +0200
+
+jolicloud-launcher (1.1.1) robby-lucid; urgency=low
+
+  * Start jolicloud-launcher earlier, at Gnome initialization
+
+ -- Adam McDaniel <adam@jolicloud.org>  Tue, 07 Sep 2010 11:00:44 -0600
+
+jolicloud-launcher (1.1.0) robby-lucid; urgency=low
+
+  * Do not call main jolicoud-launcher process "jolicloud-launcher [main]"
+  * Configure jolicloud-launcher to 'provide' netbook-launcher.
+  * Set source format to "3.0 (git)"
+
+ -- Adam McDaniel <adam@jolicloud.org>  Sat, 28 Aug 2010 23:49:41 -0600
 
 jolicloud-launcher (1.0.4) robby; urgency=low
 

@@ -2,11 +2,38 @@
 
 use LWP;
 use Logger::Syslog;
+use Net::DBus ":typing";
+use Net::DBus::Reactor;
 use POSIX;
+
+my $session_manager = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object('/org/gnome/SessionManager') or error("Could not get DBus SessionManager object");
+my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher','') or error("Could not register with SessionManager");
+my $sm_private_client = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object($sm_client_id,'org.gnome.SessionManager.ClientPrivate') or error("Could not get DBus SessionManager.ClientPrivate object with id $sm_client_id");
+$sm_private_client->connect_to_signal('Stop', sub {
+    notice("shut down by SessionManager");
+    });
+$sm_private_client->connect_to_signal('QueryEndSession', sub {
+    notice("SessionManager signaled QueryEndSession");
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),''); });
+$sm_private_client->connect_to_signal('EndSession', sub {
+    notice("SessionManager signaled EndSession");
+    &reaper;
+    $sm_private_client->EndSessionResponse(dbus_boolean(1),'');
+    exit;
+    });
+
+my $reactor = Net::DBus::Reactor->main();
 
 $| = 1;
 $0 = "jolicloud-launcher";
-info( "starting" );
+my $pid = $$;
+open PARENT, sprintf("/proc/%d/cmdline",getppid);
+my $parent = <PARENT>;
+close PARENT;
+$parent =~ s/\0.*//;
+info( sprintf ( "started by %d (%s)",getppid,$parent ) );
+
+setpgrp;
 
 # kill any remaining jolicloud-launcher from a previous session
 opendir(PROC, "/proc");
@@ -18,7 +45,7 @@ foreach (@cmds) { # jolicloud-launcher
     open(CMD,"/proc/$_/cmdline");
     $cmd = <CMD>;
     close CMD;
-    chomp $cmd;
+    $cmd =~ s/\0.*//;
     if ($cmd eq $0 && $$ ne $_) {
         info( "killing $_" );
         kill 'TERM', $_;
@@ -28,12 +55,13 @@ foreach (@cmds) { # jolicloud-launcher
 
 sleep 1 if $killed;
 
+$killed = 0;
 foreach (@cmds) { # above ought to have killed any remaining jolicloud-daemon or nickel-browser but you never know
     open(CMD,"/proc/$_/cmdline");
     $cmd = <CMD>;
     close CMD;
-    chomp $cmd;
-    if ($cmd eq "jolicloud-daemon") {
+    $cmd =~ s/\0.*//;
+    if ($cmd =~ /jolicloud-daemon/) {
         info( "killing $_" );
         kill 'TERM', $_;
         $killed = 1;
@@ -51,6 +79,7 @@ my $ONLINE_URL = "http://my.jolicloud.com";
 my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
 
 my $child;
+my @children;
 
 $child = fork;
 if ( !defined($child) ) {
@@ -74,15 +103,54 @@ elsif ( $child == 0 ) {
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
         }
-        elsif ( $? & 127 ) {
+        elsif ( WIFSIGNALED $? ) {
             error( sprintf( "jolicloud-daemon died with signal %d, %s coredump",
-                ( $? & 127 ), ( $? & 128) ? 'with' : 'without' ) );
+                ( WTERMSIG( $? ) ), ( $? & 128 ) ? 'with' : 'without' ) );
         }
         else {
-            error( "jolicloud-daemon exited with value " . ( $? >> 8 ) );
+            error( "jolicloud-daemon exited with value " . WEXITSTATUS( $? ) );
         }
     }
     exit;
+}
+else {
+    push @children,$child;
+}
+
+$child = fork;
+if ( !defined($child) ) {
+    error( "could not fork jolicloud-pkg-daemon: $!");
+}
+elsif ( $child == 0 ) {
+    close( STDOUT );
+    close( STDERR );
+    open $devnull, '+>', '/dev/null';
+    dup2( STDOUT, $devnull );
+    dup2( STDERR, $devnull );
+    $0 .= " [jolicloud-pkg-daemon]";
+    logger_prefix("jolicloud-pkg-daemon");
+    for ( ;; ) {
+        if ( `pgrep -fl ^jolicloud-pkg-daemon` ) {
+            sleep( 5 );
+            next;
+        }
+        info( "launching" );
+        system( "/usr/bin/jolicloud-pkg-daemon" );
+        if ( $? == -1 ) {
+            error( "failed to execute: $!" );
+        }
+        elsif ( WIFSIGNALED $? ) {
+            error( sprintf( "jolicloud-pkg-daemon died with signal %d, %s coredump",
+                ( WTERMSIG( $? ) ), ( $? & 128 ) ? 'with' : 'without' ) );
+        }
+        else {
+            error( "jolicloud-pkg-daemon exited with value " . WEXITSTATUS( $? ) );
+        }
+    }
+    exit;
+}
+else {
+    push @children,$child;
 }
 
 $child = fork;
@@ -137,33 +205,57 @@ elsif ( $child == 0 ) {
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
         }
-        elsif ( $? & 127 ) {
+        elsif ( WIFSIGNALED $? ) {
             error( sprintf( "nickel-browser died with signal %d, %s coredump",
-                ( $? & 127 ), ( $? & 128) ? 'with' : 'without' ) );
+                ( WTERMSIG( $? ) ), ( $? & 128 ) ? 'with' : 'without' ) );
+            if ( WTERMSIG( $? ) == 6 ) { # ABRT received, usually means end of session
+                kill 'QUIT', $pid;
+            }
         }
         else {
-            error( "nickel-browser exited with value " . ( $? >> 8 ) );
+            error( "nickel-browser exited with value " . WEXITSTATUS( $? ) );
         }
     }
     exit;
 }
+else {
+    push @children,$child;
+}
 
-# If something happens to the main program, kill all the program group
-
+$SIG{ 'QUIT' } = \&reaper;
 $SIG{ 'INT' } = \&reaper;
 $SIG{ 'TERM' } = \&reaper;
 $SIG{ 'KILL' } = \&reaper;
 $SIG{ 'HUP' } = 'IGNORE';
 
+# If something happens to the main program, kill all the program group
 sub reaper
 {
     my $sig = shift;
-    info( "caught a SIG$sig--shutting down" );
+    info( "caught a SIG$sig--shutting down" ) if $sig;
+    info( "shutting down" ) unless $sig;
+    # kill our direct children first, so that they don't relaunch the others
+    foreach(@children) {
+        info( "killing $_" );
+        kill( 'TERM', $_);
+    }
+    sleep 1;
+    local $SIG{'QUIT'} = 'IGNORE';
+    kill( 'QUIT', -getpgrp );
+    sleep 1;
+    local $SIG{'TERM'} = 'IGNORE';
     kill( 'TERM', -getpgrp );
-    exit 0;
+    $session_manager->UnregisterClient($sm_client_id);
+    exit if $sig;
 }
 
-do { # avoid zombies
-    $child = waitpid( -1, 0 );
-} while $child > 0;
+# Wait for all children before exiting
+my $hook = $reactor->add_hook(Net::DBus::Callback->new(
+    method => sub {
+        my $kid;
+        do {
+            $kid = waitpid( -1, WNOHANG );
+        } while $kid > 0;
+    }));
 
+$reactor->run();
