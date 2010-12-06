@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.8) robby-1.1; urgency=low
+
+  * Add jolicloud-pkg-daemon management functionality
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Mon, 06 Dec 2010 10:06:45 +0100
+
 jolicloud-launcher (1.1.7) robby-lucid; urgency=low
 
   * send EndSessionResponse to gnome-session *before* exiting
