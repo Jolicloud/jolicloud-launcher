@@ -119,42 +119,6 @@ else {
 
 $child = fork;
 if ( !defined($child) ) {
-    error( "could not fork jolicloud-pkg-daemon: $!");
-}
-elsif ( $child == 0 ) {
-    close( STDOUT );
-    close( STDERR );
-    open $devnull, '+>', '/dev/null';
-    dup2( STDOUT, $devnull );
-    dup2( STDERR, $devnull );
-    $0 .= " [jolicloud-pkg-daemon]";
-    logger_prefix("jolicloud-pkg-daemon");
-    for ( ;; ) {
-        if ( `pgrep -fl ^jolicloud-pkg-daemon` ) {
-            sleep( 5 );
-            next;
-        }
-        info( "launching" );
-        system( "/usr/bin/jolicloud-pkg-daemon" );
-        if ( $? == -1 ) {
-            error( "failed to execute: $!" );
-        }
-        elsif ( WIFSIGNALED $? ) {
-            error( sprintf( "jolicloud-pkg-daemon died with signal %d, %s coredump",
-                ( WTERMSIG( $? ) ), ( $? & 128 ) ? 'with' : 'without' ) );
-        }
-        else {
-            error( "jolicloud-pkg-daemon exited with value " . WEXITSTATUS( $? ) );
-        }
-    }
-    exit;
-}
-else {
-    push @children,$child;
-}
-
-$child = fork;
-if ( !defined($child) ) {
     error( "could not fork nickel-browser: $!");
 }
 elsif ( $child == 0 ) {
