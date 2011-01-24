@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.9) robby-1.1; urgency=low
+
+  * Revert "Add jolicloud-pkg-daemon management functionality"
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Mon, 24 Jan 2011 11:35:16 +0100
+
 jolicloud-launcher (1.1.8) robby-1.1; urgency=low
 
   * Add jolicloud-pkg-daemon management functionality
