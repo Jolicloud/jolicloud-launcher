@@ -7,7 +7,7 @@ use Net::DBus::Reactor;
 use POSIX;
 
 my $session_manager = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object('/org/gnome/SessionManager') or error("Could not get DBus SessionManager object");
-my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher','') or error("Could not register with SessionManager");
+my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher.desktop','') or error("Could not register with SessionManager");
 my $sm_private_client = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object($sm_client_id,'org.gnome.SessionManager.ClientPrivate') or error("Could not get DBus SessionManager.ClientPrivate object with id $sm_client_id");
 $sm_private_client->connect_to_signal('Stop', sub {
     notice("shut down by SessionManager");
