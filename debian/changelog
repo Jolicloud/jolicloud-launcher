@@ -1,3 +1,9 @@
+jolicloud-launcher (1.1.10) robby-1.1; urgency=low
+
+  * Register with session manager as jolicloud-launcher.desktop, duh
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Tue, 25 Jan 2011 17:37:02 +0100
+
 jolicloud-launcher (1.1.9) robby-1.1; urgency=low
 
   * Revert "Add jolicloud-pkg-daemon management functionality"
