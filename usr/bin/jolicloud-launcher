@@ -6,6 +6,13 @@ use Net::DBus ":typing";
 use Net::DBus::Reactor;
 use POSIX;
 
+sub is_guest
+{
+    my $guest_gid = getgrnam("guest");
+    my @groups = split(' ',$();
+    return grep $_ eq $guest_gid, @groups
+}
+
 my $session_manager = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object('/org/gnome/SessionManager') or error("Could not get DBus SessionManager object");
 my $sm_client_id = $session_manager->RegisterClient('jolicloud-launcher.desktop','') or error("Could not register with SessionManager");
 my $sm_private_client = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object($sm_client_id,'org.gnome.SessionManager.ClientPrivate') or error("Could not get DBus SessionManager.ClientPrivate object with id $sm_client_id");
@@ -75,8 +82,10 @@ foreach (@cmds) { # above ought to have killed any remaining jolicloud-daemon or
 
 sleep 1 if $killed;
 
-my $ONLINE_URL = "http://my.jolicloud.com";
-my $OFFLINE_URL = "file:///usr/share/jolicloud-daemon/htdocs/index.html";
+use constant {
+    ONLINE_URL => "http://my.jolicloud.com",
+    OFFLINE_URL => "file:///usr/share/jolicloud-daemon/htdocs/index.html",
+};
 
 my $child;
 my @children;
@@ -122,13 +131,18 @@ if ( !defined($child) ) {
     error( "could not fork nickel-browser: $!");
 }
 elsif ( $child == 0 ) {
-    my $ua = LWP::UserAgent->new();
     close( STDOUT );
     close( STDERR );
+    open $devnull, '+>', '/dev/null';
+    dup2( STDOUT, $devnull );
+    dup2( STDERR, $devnull );
     $0 .= " [nickel-browser]";
     logger_prefix("nickel-browser");
 
-    $max_flag = "--start-maximized";
+    my $incognito_flag = "--no-incognito";
+    $incognito_flag = "--incognito" if &is_guest;
+
+    my $max_flag = "--start-maximized";
     open XDPYINFO, "xdpyinfo |";
     while (<XDPYINFO>) {
         if (/^ *dimensions:.+\((\d+)x(\d+) millimeters/) {
@@ -148,23 +162,24 @@ elsif ( $child == 0 ) {
             next;
         }
 
-        info( "launching $max_flag" );
+        info( "launching $max_flag $incognito_flag" );
 
         # Do a generic ping of the ping URL. If it responds with error
         # status 400: NOT_LOGGED_IN we know we have internet access to the
         # jolicloud server.
-        my $req = HTTP::Request->new( GET => "$ONLINE_URL/api/ping" );
+        my $ua = LWP::UserAgent->new();
+        my $req = HTTP::Request->new( GET => ONLINE_URL . "/api/ping" );
         my $res = $ua->request( $req );
-        my $url = $ONLINE_URL;
+        my $url = ONLINE_URL;
         unless ( $res->code eq 400 &&
              $res->content eq '{"error":{"code":"NOT_LOGGED_IN"}}' ) {
             # No internet access, display the internal offline URL.
-            $url = $OFFLINE_URL;
+            $url = OFFLINE_URL;
         }
 
         system( "/usr/bin/nickel-browser", "--app=$url", "--desktop",
                 "--no-default-browser-check",
-                $max_flag,
+                $max_flag, $incognito_flag,
                 "--no-first-run", "--enable-ipv6" );
         if ( $? == -1 ) {
             error( "failed to execute: $!" );
