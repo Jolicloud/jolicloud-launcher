@@ -6,11 +6,20 @@ use Net::DBus ":typing";
 use Net::DBus::Reactor;
 use POSIX;
 
-sub is_guest
+sub is_incognito
 {
+# are we a member of the guest group?
     my $guest_gid = getgrnam("guest");
     my @groups = split(' ',$();
-    return grep $_ eq $guest_gid, @groups
+    return 1 if grep $_ eq $guest_gid, @groups;
+# are we running inside a live session?
+    if (open(CMDLINE,'/proc/cmdline')) {
+        while (<CMDLINE>) {
+            return 1 if m{/cdrom/preseed/jolicloud.seed};
+        }
+    }
+# if not, we are not incognito
+    return 0;
 }
 
 my $session_manager = Net::DBus->session->get_service('org.gnome.SessionManager')->get_object('/org/gnome/SessionManager') or error("Could not get DBus SessionManager object");
@@ -140,7 +149,7 @@ elsif ( $child == 0 ) {
     logger_prefix("nickel-browser");
 
     my $incognito_flag = "--no-incognito";
-    $incognito_flag = "--incognito" if &is_guest;
+    $incognito_flag = "--incognito" if &is_incognito;
 
     my $max_flag = "--start-maximized";
     open XDPYINFO, "xdpyinfo |";
