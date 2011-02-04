@@ -1,3 +1,10 @@
+jolicloud-launcher (1.1.11) robby-1.2; urgency=low
+
+  * Incognito mode if guest
+  * Launch nickel incognito if guest or live
+
+ -- Benjamin Ryzman <benjamin@jolicloud.org>  Fri, 04 Feb 2011 10:51:35 +0100
+
 jolicloud-launcher (1.1.10) robby-1.1; urgency=low
 
   * Register with session manager as jolicloud-launcher.desktop, duh
