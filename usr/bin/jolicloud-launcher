@@ -9,7 +9,7 @@ use POSIX;
 sub is_incognito
 {
 # are we a member of the guest group?
-    my $guest_gid = getgrnam("guest");
+    my $guest_gid = getgrnam("guests");
     my @groups = split(' ',$();
     return 1 if grep $_ eq $guest_gid, @groups;
 # are we running inside a live session?
