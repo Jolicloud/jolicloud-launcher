@@ -5,6 +5,8 @@ Maintainer: Jolicloud developers <developers@jolicloud.org>
 Build-Depends: debhelper (>= 7), git-core
 Standards-Version: 3.8.0
 Homepage: http://www.jolicloud.org
+Vcs-Git: git://github.com/jolicloud/jolicloud-launcher.git
+Vcs-Browser: https://github.com/jolicloud/jolicloud-launcher
 
 Package: jolicloud-launcher
 Architecture: all
