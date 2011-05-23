@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Jolicloud
+Comment=A HTML5 desktop
+Icon=gnome-fs-desktop
+Exec=gnome-session --session=jolicloud-gnome
+Type=XSession
+X-Ubuntu-Gettext-Domain=gnome-session-2.0

@@ -19,6 +19,13 @@ case "$1" in
             # /var/run/reboot-required itself.
             apt-queue /usr/lib/jolicloud-notifier/reboot-dialog
         fi
+
+        if dpkg --compare-versions "$2" le "2.0.0"; then
+            echo "Removing autostart jolicloud-launcher.desktop"
+            if [ -e /etc/xdg/autostart/jolicloud-launcher.desktop ]; then
+                rm /etc/xdg/autostart/jolicloud-launcher.desktop;
+            fi
+        fi
 esac
 
 #DEBHELPER#

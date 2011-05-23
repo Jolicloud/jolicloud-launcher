@@ -1,0 +1,7 @@
+[GNOME Session]
+Name=Jolicloud
+Required=windowmanager;panel;filemanager;
+Required-windowmanager=metacity
+Required-panel=gnome-panel
+Required-filemanager=jolicloud-launcher
+DefaultApps=gnome-settings-daemon;
